@@ -24,7 +24,7 @@ if(process.env.NODE_ENV === 'development') {
 
 
 // Routes
-app.use('api/v1/categories', categoryRoutes)
+app.use('/api/v1/categories', categoryRoutes)
 
 
 const port = process.env.PORT || 8000

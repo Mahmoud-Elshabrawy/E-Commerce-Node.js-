@@ -7,8 +7,13 @@ const CategorySchema = new mongoose.Schema({
         unique: [true, 'category must be unique'],
         minlength: [3, 'Too short category name'],
         maxlength: [20, 'Too long category name']
-    }
-})
+    },
+    slug: {
+        type: String,
+        lowercase: true
+    },
+    image: String
+}, {timestamps: true})
 
 const CategoryModel = mongoose.model('Category', CategorySchema)
 module.exports = CategoryModel
