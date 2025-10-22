@@ -2,14 +2,9 @@ const Category = require("../models/categoryModel");
 const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
-const { default: mongoose } = require("mongoose");
 
 
-const checkId = (id) => {
-  if(! mongoose.Types.ObjectId.isValid(id)) {
-    return ne
-  }
-}
+
 // @desc Get List of Categories
 // @route GET /api/v1/categories
 // @access Public
