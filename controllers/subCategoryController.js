@@ -3,11 +3,23 @@ const AppError = require("../utils/appError");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 
+
+
+exports.setCategoryIdToBody = (req, res, next) => {
+    if(!req.body.category) req.body.category = req.params.categoryId
+    next()
+}
+
 exports.getSubCategories = asyncHandler(async (req, res) => {
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 10;
   const skip = (page - 1) * limit;
-  const subCategories = await SubCategory.find()
+
+  let filterObj = {}
+  if(req.params.categoryId) {
+    filterObj = req.params.categoryId
+  }
+  const subCategories = await SubCategory.find({category: filterObj})
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });

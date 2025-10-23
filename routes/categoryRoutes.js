@@ -1,5 +1,6 @@
 const express = require("express");
 const categoryController = require("../controllers/categoryController");
+const subCategoryRoutes = require('./subCategoryRoutes')
 const {
   getCategoryValidator,
   createCategoryValidator,
@@ -14,6 +15,8 @@ router
   .route("/")
   .get(categoryController.getCategories)
   .post(createCategoryValidator, categoryController.createCategory);
+
+router.use('/:categoryId/subcategories', subCategoryRoutes)
 
 router
   .route("/:id")
