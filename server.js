@@ -8,6 +8,7 @@ const AppError = require('./utils/appError')
 const categoryRoutes = require('./routes/categoryRoutes')
 const subCategoryRoutes = require('./routes/subCategoryRoutes')
 const brandRoutes = require('./routes/brandRoutes')
+const productRoutes = require('./routes/productRoutes')
 
 // DB Connection
 dbConnection()
@@ -31,6 +32,7 @@ if(process.env.NODE_ENV === 'development') {
 app.use('/api/v1/categories', categoryRoutes)
 app.use('/api/v1/subcategories', subCategoryRoutes)
 app.use('/api/v1/brands', brandRoutes)
+app.use('/api/v1/products', productRoutes)
 
 app.use((req, res, next) => {
     next(new AppError(`Can\'t find this route: ${req.originalUrl}`, 400))
