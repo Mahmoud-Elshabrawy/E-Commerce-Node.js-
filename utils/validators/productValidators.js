@@ -1,5 +1,8 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validator").validator;
+const Category = require('../../models/categoryModel')
+const SubCategory = require('../../models/subCategoryModel')
+
 
 exports.getProductValidator = [
   check("id").isMongoId().withMessage("Invalid Product ID format"),
@@ -56,8 +59,33 @@ exports.createProductValidator = [
     .notEmpty()
     .withMessage("Product must be belong to category")
     .isMongoId()
-    .withMessage("Invalid Product ID format"),
-  check("subcategory").optional().isMongoId().withMessage("Invalid Product ID format"),
+    .withMessage("Invalid Category ID format")
+    .custom(async (categoryId) => {
+        const category = await Category.findById(categoryId)
+        if(!category) {
+            throw new Error(`No Category for this ID: ${categoryId} in DB`)
+        }
+        return true
+    }),
+  check("subcategories").optional().isArray().withMessage('Subcategories must be an array of IDs').isMongoId().withMessage("Invalid subcategories ID format")
+  .custom(async (subCategoriesIds) => {
+    const subcategories = await SubCategory.find({_id: {$in: subCategoriesIds}})
+    const existingIds = subcategories.map((sub) => sub._id.toString())
+    const InvalId = subCategoriesIds.filter(id => !existingIds.includes(id))
+    if(subcategories.length !== subCategoriesIds.length) {
+        throw new Error(`No SubCategory for this ID: ${InvalId}  in DB`)
+    }
+    // Another Solution
+    // await Promise.all(
+    //     subCategoriesIds.map(async (id) => {
+    //         const subCategory = await SubCategory.findById(id)
+    //         if(!subCategory) {
+    //             throw new Error(`No SubCategory for this ID: ${id} in DB`)
+    //         }
+    //         return true
+    //     })
+    // )
+  }),
   check("brand").optional().isMongoId().withMessage("Invalid Product ID format"),
   check("ratingsAverage")
     .isNumeric()
