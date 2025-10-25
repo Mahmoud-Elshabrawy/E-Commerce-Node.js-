@@ -17,9 +17,9 @@ exports.getSubCategories = asyncHandler(async (req, res) => {
 
   let filterObj = {}
   if(req.params.categoryId) {
-    filterObj = req.params.categoryId
+    filterObj.category = req.params.categoryId
   }
-  const subCategories = await SubCategory.find({category: filterObj})
+  const subCategories = await SubCategory.find(filterObj)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
