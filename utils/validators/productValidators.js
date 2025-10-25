@@ -1,12 +1,11 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validator").validator;
-const Category = require('../../models/categoryModel')
-const SubCategory = require('../../models/subCategoryModel')
-
+const Category = require("../../models/categoryModel");
+const SubCategory = require("../../models/subCategoryModel");
 
 exports.getProductValidator = [
   check("id").isMongoId().withMessage("Invalid Product ID format"),
-  validatorMiddleware
+  validatorMiddleware,
 ];
 
 exports.createProductValidator = [
@@ -34,7 +33,7 @@ exports.createProductValidator = [
     .toFloat()
     .custom((val, { req }) => {
       if (req.body.price <= val) {
-        throw new Error('priceAfterDiscount must be lower than price')
+        throw new Error("priceAfterDiscount must be lower than price");
       }
       return true;
     }),
@@ -60,33 +59,65 @@ exports.createProductValidator = [
     .withMessage("Product must be belong to category")
     .isMongoId()
     .withMessage("Invalid Category ID format")
+    // Check if the Category ID is Exists in DB
     .custom(async (categoryId) => {
-        const category = await Category.findById(categoryId)
-        if(!category) {
-            throw new Error(`No Category for this ID: ${categoryId} in DB`)
-        }
-        return true
+      const category = await Category.findById(categoryId);
+      if (!category) {
+        throw new Error(`No Category for this ID: ${categoryId} in DB`);
+      }
+      return true;
     }),
-  check("subcategories").optional().isArray().withMessage('Subcategories must be an array of IDs').isMongoId().withMessage("Invalid subcategories ID format")
-  .custom(async (subCategoriesIds) => {
-    const subcategories = await SubCategory.find({_id: {$in: subCategoriesIds}})
-    const existingIds = subcategories.map((sub) => sub._id.toString())
-    const InvalId = subCategoriesIds.filter(id => !existingIds.includes(id))
-    if(subcategories.length !== subCategoriesIds.length) {
-        throw new Error(`No SubCategory for this ID: ${InvalId}  in DB`)
-    }
-    // Another Solution
-    // await Promise.all(
-    //     subCategoriesIds.map(async (id) => {
-    //         const subCategory = await SubCategory.findById(id)
-    //         if(!subCategory) {
-    //             throw new Error(`No SubCategory for this ID: ${id} in DB`)
-    //         }
-    //         return true
-    //     })
-    // )
-  }),
-  check("brand").optional().isMongoId().withMessage("Invalid Product ID format"),
+    check("subcategories")
+    .optional()
+    .isArray()
+    .withMessage("Subcategories must be an array of IDs")
+    .isMongoId()
+    .withMessage("Invalid subcategories ID format")
+    
+    // check if subCategories ID is Exists in DB
+    .custom(async (subCategoriesIds) => {
+      const subcategories = await SubCategory.find({
+        _id: { $in: subCategoriesIds },
+      });
+      const existingIds = subcategories.map((sub) => sub._id.toString());
+      const InvalId = subCategoriesIds.filter(
+        (id) => !existingIds.includes(id)
+      );
+      if (subcategories.length !== subCategoriesIds.length) {
+        throw new Error(`No SubCategory for this ID: ${InvalId}  in DB`);
+      }
+      // Another Solution
+      // await Promise.all(
+      //     subCategoriesIds.map(async (id) => {
+      //         const subCategory = await SubCategory.findById(id)
+      //         if(!subCategory) {
+      //             throw new Error(`No SubCategory for this ID: ${id} in DB`)
+      //         }
+      //         return true
+      //     })
+      // )
+    })
+    // Check if the subCategories ID's is belongs to Category
+    .custom(async (val, { req }) => {
+      const subcategories = await SubCategory.find({
+        category: req.body.category,
+      });
+      const existingSubCategories = subcategories.map((sub) =>
+        sub._id.toString()
+      );
+      const InvalIds = val.filter((id) => !existingSubCategories.includes(id));
+      console.log(InvalIds);
+
+      if (InvalIds.length !== 0) {
+        throw new Error(
+          `This SubCategory ID: ${InvalIds} doesn\'t belong to this Category: ${req.body.category}`
+        );
+      }
+    }),
+  check("brand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid Product ID format"),
   check("ratingsAverage")
     .isNumeric()
     .withMessage("ratingsAverage must be Number")
@@ -99,15 +130,15 @@ exports.createProductValidator = [
     .isNumeric()
     .withMessage("ratingsAverage must be Number"),
 
-  validatorMiddleware
+  validatorMiddleware,
 ];
 
 exports.updateProductValidator = [
   check("id").isMongoId().withMessage("Invalid Product ID format"),
-  validatorMiddleware
+  validatorMiddleware,
 ];
 
 exports.deleteProductValidator = [
   check("id").isMongoId().withMessage("Invalid Product ID format"),
-  validatorMiddleware
+  validatorMiddleware,
 ];
