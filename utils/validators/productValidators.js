@@ -14,7 +14,7 @@ exports.createProductValidator = [
     .withMessage("Product required")
     .isLength({ min: 3 })
     .withMessage("Too short Product name")
-    .isLength({ max: 60 })
+    .isLength({ max: 100 })
     .withMessage("Too long Product name"),
   check("description")
     .notEmpty()
