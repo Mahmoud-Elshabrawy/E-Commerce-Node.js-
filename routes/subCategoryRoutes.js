@@ -13,7 +13,7 @@ const router = express.Router({mergeParams: true});
 router
   .route('/')
   .get(subCategoryController.getSubCategories)
-  .post(setCategoryIdToBody, createSubCategoryValidator, subCategoryController.createSubCategory);
+  .post(createSubCategoryValidator, subCategoryController.createSubCategory);
 
 
 router

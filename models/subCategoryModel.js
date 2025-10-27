@@ -25,5 +25,11 @@ const subCategorySchema = new mongoose.Schema(
   }
 );
 
+// Query Middleware
+subCategorySchema.pre(/^find/, function(next) {
+  this.populate({path: 'category', select: 'name'})
+  next()
+})
+
 const subCategoryModel = mongoose.model("SubCategory", subCategorySchema);
 module.exports = subCategoryModel;
