@@ -14,7 +14,7 @@ const router = express.Router();
 router
   .route("/")
   .get(categoryController.getCategories)
-  .post(createCategoryValidator, categoryController.createCategory);
+  .post(categoryController.uploadCategoryImage, createCategoryValidator, categoryController.createCategory);
 
 router.use('/:categoryId/subcategories', subCategoryRoutes)
 
