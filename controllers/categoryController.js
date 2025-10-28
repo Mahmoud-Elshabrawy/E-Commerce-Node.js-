@@ -1,23 +1,12 @@
-const Category = require("../models/categoryModel");
-const AppError = require("../utils/appError");
 const asyncHandler = require("express-async-handler");
-const factory = require("./handlersFactory");
-const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const sharp = require("sharp");
 
-const storage = multer.memoryStorage();
+const factory = require("./handlersFactory");
+const {uploadSingleImage} = require('../middlewares/uploadImage')
+const Category = require("../models/categoryModel");
 
-const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(new AppError("Not an image! Please provides only images"), false);
-  }
-};
-
-const upload = multer({ storage: storage, fileFilter: multerFilter });
-exports.uploadCategoryImage = upload.single("image");
+exports.uploadCategoryImage = uploadSingleImage('image')
 
 exports.resizeImage = asyncHandler(async (req, res, next) => {
   if (!req.file) {
