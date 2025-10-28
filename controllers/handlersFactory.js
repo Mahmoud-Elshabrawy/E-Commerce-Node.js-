@@ -44,8 +44,8 @@ exports.getOne = (Model) => asyncHandler(async (req, res, next) => {
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    const name = req.body.name;
-    const document = await Model.create({ name, slug: slugify(name) });
+    req.body.slug = slugify(req.body.name)
+    const document = await Model.create(req.body);
 
     res.status(201).json({
       status: "success",

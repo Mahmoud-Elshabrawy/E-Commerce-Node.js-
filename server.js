@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const dotenv = require('dotenv')
 const morgan = require('morgan')
@@ -22,6 +23,7 @@ const app = express()
 
 // Middlewares
 app.use(express.json())
+app.use(express.static(path.join(__dirname, 'uploads')))
 if(process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
     // console.log(`The Current Mode is: ${process.env.NODE_ENV}`);
