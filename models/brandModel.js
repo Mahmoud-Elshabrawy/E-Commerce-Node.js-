@@ -21,10 +21,10 @@ const setImgUrl = (doc) => {
         doc.image = imgUrl
     }
 }
-CategorySchema.pre('init', function(doc) {
+BrandSchema.pre('init', function(doc) {
     setImgUrl(doc)
 })
-CategorySchema.pre('save', function () {
+BrandSchema.pre('save', function () {
     setImgUrl(this)
 })
 
