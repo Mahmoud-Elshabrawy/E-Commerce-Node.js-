@@ -2,8 +2,7 @@ const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const { v4: uuidv4 } = require("uuid");
 const sharp = require("sharp");
-const bcrypt = require('bcryptjs');
-
+const bcrypt = require("bcryptjs");
 
 const factory = require("./handlersFactory");
 const { uploadSingleImage } = require("../middlewares/uploadImage");
@@ -59,14 +58,15 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 });
 
 exports.updatePassword = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id)
+  const user = await User.findById(req.params.id);
   if (!user) {
     return next(
       new AppError(`No user found with this ID: ${req.params.id}`, 404)
     );
   }
   user.password = req.body.password;
-  await user.save()
+  user.passwordChangedAt = Date.now();
+  await user.save();
   res.status(200).json({
     status: "success",
     data: user,
