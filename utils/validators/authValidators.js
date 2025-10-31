@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validator");
 const User = require("../../models/userModel");
@@ -40,5 +39,19 @@ exports.signUpValidator = [
     .isMobilePhone(["ar-EG", "ar-SA"])
     .withMessage("Invalid phone number"),
   ,
+  validatorMiddleware.validator,
+];
+
+exports.logInValidator = [
+  check("email")
+    .notEmpty()
+    .withMessage("email required")
+    .isEmail()
+    .withMessage("invalid email address"),
+  check("password")
+    .notEmpty()
+    .withMessage("password required")
+    .isLength({ min: 6 })
+    .withMessage("password must be at least 6 characters"),
   validatorMiddleware.validator,
 ];

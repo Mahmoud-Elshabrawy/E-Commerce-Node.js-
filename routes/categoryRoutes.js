@@ -17,12 +17,15 @@ const {
   deleteCategoryValidator,
 } = require("../utils/validators/categoryValidator");
 
+const { protect } = require("../controllers/authController");
+
 const router = express.Router();
 
 router
   .route("/")
   .get(getCategories)
   .post(
+    protect,
     uploadCategoryImage,
     resizeImage,
     createCategoryValidator,
