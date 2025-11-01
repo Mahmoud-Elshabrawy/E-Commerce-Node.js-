@@ -16,16 +16,20 @@ const {
   updateProductValidator,
   deleteProductValidator,
 } = require("../utils/validators/productValidators");
+const { protect, restrictTo } = require("../controllers/authController");
 
 const router = express.Router();
 
-router.route("/").get(getProducts).post(uploadProductImages, resizeImg, createProductValidator, createProduct);
+router.route("/").get(getProducts).post(protect,
+    restrictTo('admin', 'manager'),uploadProductImages, resizeImg, createProductValidator, createProduct);
 
 
 router
   .route("/:id")
   .get(getProductValidator, getProduct)
-  .patch(uploadProductImages, resizeImg, updateProductValidator, updateProduct)
-  .delete(deleteProductValidator, deleteProduct);
+  .patch(protect,
+    restrictTo('admin', 'manager'),uploadProductImages, resizeImg, updateProductValidator, updateProduct)
+  .delete(protect,
+    restrictTo('admin'),deleteProductValidator, deleteProduct);
 
 module.exports = router;

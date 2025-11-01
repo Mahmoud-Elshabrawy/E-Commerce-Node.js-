@@ -7,24 +7,47 @@ const {
   deleteUser,
   updatePassword,
   uploadUserProfileImg,
-  resizeImage
+  resizeImage,
 } = require("../controllers/userController");
+
 const {
   getUserValidator,
   createUserValidator,
   deleteUserValidator,
   updateUserValidator,
-  updatePasswordValidator
+  updatePasswordValidator,
 } = require("../utils/validators/userValidators");
+
+const { protect, restrictTo } = require("../controllers/authController");
 
 const router = express.Router();
 
-router.route("/").get(getUsers).post(uploadUserProfileImg, resizeImage, createUserValidator, createUser);
-router.patch('/updatePassword/:id', updatePasswordValidator, updatePassword)
+router.patch("/updatePassword/:id", updatePasswordValidator, updatePassword);
+
+
+router
+  .route("/")
+  .get(protect, restrictTo("admin", "manager"), getUsers)
+  .post(
+    protect,
+    restrictTo("admin"),
+    uploadUserProfileImg,
+    resizeImage,
+    createUserValidator,
+    createUser
+  );
+  
 router
   .route("/:id")
-  .get(getUserValidator, getUser)
-  .patch(uploadUserProfileImg, resizeImage, updateUserValidator, updateUser)
-  .delete(deleteUserValidator, deleteUser);
+  .get(protect, restrictTo("admin"), getUserValidator, getUser)
+  .patch(
+    protect,
+    restrictTo("admin"),
+    uploadUserProfileImg,
+    resizeImage,
+    updateUserValidator,
+    updateUser
+  )
+  .delete(protect, restrictTo("admin"), deleteUserValidator, deleteUser);
 
 module.exports = router;

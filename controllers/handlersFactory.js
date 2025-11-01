@@ -55,7 +55,7 @@ exports.createOne = (Model) =>
 
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    if (req.body.name) {
+    if (req.body && req.body.name) {
       req.body.slug = slugify(req.body.name);
     }
     const document = await Model.findByIdAndUpdate(req.params.id, req.body, {

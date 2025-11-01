@@ -17,7 +17,7 @@ const {
   deleteCategoryValidator,
 } = require("../utils/validators/categoryValidator");
 
-const { protect } = require("../controllers/authController");
+const { protect, restrictTo } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -26,6 +26,7 @@ router
   .get(getCategories)
   .post(
     protect,
+    restrictTo("admin", "manager"),
     uploadCategoryImage,
     resizeImage,
     createCategoryValidator,
@@ -38,11 +39,18 @@ router
   .route("/:id")
   .get(getCategoryValidator, getCategory)
   .patch(
+    protect,
+    restrictTo("admin", "manager"),
     uploadCategoryImage,
     resizeImage,
     updateCategoryValidator,
     updateCategory
   )
-  .delete(deleteCategoryValidator, deleteCategory);
+  .delete(
+    protect,
+    restrictTo("admin"),
+    deleteCategoryValidator,
+    deleteCategory
+  );
 
 module.exports = router;

@@ -7,19 +7,23 @@ const {
   deleteSubCategoryValidator,
 } = require("../utils/validators/subCategoryValidators");
 const {setCategoryIdToBody} = require('../controllers/subCategoryController')
+const { protect, restrictTo } = require("../controllers/authController");
 
 const router = express.Router({mergeParams: true});
 
 router
   .route('/')
   .get(subCategoryController.getSubCategories)
-  .post(createSubCategoryValidator, subCategoryController.createSubCategory);
+  .post(protect,
+    restrictTo('admin', 'manager'),createSubCategoryValidator, subCategoryController.createSubCategory);
 
 
 router
   .route('/:id')
   .get(getSubCategoryValidator, subCategoryController.getSubCategory)
-  .patch(updateSubCategoryValidator, subCategoryController.updateSubCategory)
-  .delete(deleteSubCategoryValidator, subCategoryController.deleteSubCategory)
+  .patch(protect,
+    restrictTo('admin', 'manager'),updateSubCategoryValidator, subCategoryController.updateSubCategory)
+  .delete(protect,
+    restrictTo('admin'),deleteSubCategoryValidator, subCategoryController.deleteSubCategory)
 
 module.exports = router;

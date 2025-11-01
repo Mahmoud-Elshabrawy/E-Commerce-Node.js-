@@ -7,7 +7,7 @@ const User = require("../models/userModel");
 const { default: slugify } = require("slugify");
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET_KEY, {
+  return jwt.sign({ id, ts: Date.now() }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_IN,
   });
 };
@@ -20,9 +20,9 @@ exports.signUp = asyncHandler(async (req, res) => {
   const token = generateToken(user._id);
   res.status(201).json({
     status: "success",
+    token,
     data: {
       user,
-      token,
     },
   });
 });
@@ -42,9 +42,9 @@ exports.login = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id);
   res.status(200).json({
     status: "success",
+    token,
     data: {
       user,
-      token,
     },
   });
 });
@@ -81,3 +81,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
   req.user = user;
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You don't have permission to perform this action", 403)
+      );
+    }
+    next();
+  };
+};
