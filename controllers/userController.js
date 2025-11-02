@@ -29,6 +29,11 @@ exports.getUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);
 exports.createUser = factory.createOne(User);
 
+exports.getLoggedUser = asyncHandler(async (req, res, next) => {
+  req.params.id = req.user._id
+  next()
+})
+
 exports.updateUser = asyncHandler(async (req, res, next) => {
   // Prevent Update Password on this route
   if (req.body.password) {

@@ -8,6 +8,7 @@ const {
   updatePassword,
   uploadUserProfileImg,
   resizeImage,
+  getLoggedUser
 } = require("../controllers/userController");
 
 const {
@@ -23,6 +24,8 @@ const { protect, restrictTo } = require("../controllers/authController");
 const router = express.Router();
 
 router.patch("/updatePassword/:id", updatePasswordValidator, updatePassword);
+
+router.get('/getMe', protect, getLoggedUser, getUser)
 
 
 router
