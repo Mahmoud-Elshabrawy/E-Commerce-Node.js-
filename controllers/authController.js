@@ -1,6 +1,6 @@
 const crypto = require("crypto");
-
 const jwt = require("jsonwebtoken");
+
 const bcrypt = require("bcryptjs");
 
 const asyncHandler = require("express-async-handler");
@@ -8,12 +8,8 @@ const AppError = require("../utils/appError");
 const User = require("../models/userModel");
 const { default: slugify } = require("slugify");
 const sendEmail = require("../utils/email");
+const generateToken = require('../utils/generateToken')
 
-const generateToken = (id) => {
-  return jwt.sign({ id, ts: Date.now() }, process.env.JWT_SECRET_KEY, {
-    expiresIn: process.env.JWT_EXPIRE_IN,
-  });
-};
 
 exports.signUp = asyncHandler(async (req, res) => {
   // create user
@@ -42,7 +38,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
 
   // generate token
-  const token = generateToken(user._id);
+  const token = generateToken(user._id);  
   res.status(200).json({
     status: "success",
     token,

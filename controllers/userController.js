@@ -8,6 +8,7 @@ const factory = require("./handlersFactory");
 const { uploadSingleImage } = require("../middlewares/uploadImage");
 const User = require("../models/userModel");
 const AppError = require("../utils/appError");
+const generateToken = require("../utils/generateToken");
 
 exports.uploadUserProfileImg = uploadSingleImage("profileImg");
 
@@ -30,9 +31,43 @@ exports.getUser = factory.getOne(User);
 exports.createUser = factory.createOne(User);
 
 exports.getLoggedUser = asyncHandler(async (req, res, next) => {
-  req.params.id = req.user._id
-  next()
-})
+  req.params.id = req.user._id;
+  next();
+});
+
+exports.updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+  const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
+  if (!isMatch) return next(new AppError("Current password is incorrect", 400));
+
+  user.password = req.body.newPassword;
+  user.passwordChangedAt = Date.now();
+  await user.save();
+  const token = generateToken(user._id);
+  res.status(200).json({
+    status: "success",
+    token,
+    data: user,
+  });
+});
+
+exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      slug: req.body.slug
+    },
+    { new: true }
+  );
+
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
+});
 
 exports.updateUser = asyncHandler(async (req, res, next) => {
   // Prevent Update Password on this route
