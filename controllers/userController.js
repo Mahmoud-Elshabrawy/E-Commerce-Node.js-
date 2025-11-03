@@ -69,6 +69,15 @@ exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
   });
 });
 
+
+exports.deleteLoggedUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.user._id, {active: false})
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+})
+
 exports.updateUser = asyncHandler(async (req, res, next) => {
   // Prevent Update Password on this route
   if (req.body.password) {

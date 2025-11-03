@@ -11,6 +11,7 @@ const {
   getLoggedUser,
   updateLoggedUserPassword,
   updateLoggedUserData,
+  deleteLoggedUser
 } = require("../controllers/userController");
 
 const {
@@ -32,6 +33,7 @@ router.use(protect);
 router.get("/getMe", getLoggedUser, getUser);
 router.patch("/updateMyPassword", updateLoggedUserPassword);
 router.patch("/updateMyData", updateLoggedUserValidator, updateLoggedUserData);
+router.delete("/deleteMe", deleteLoggedUser);
 
 router
   .route("/")

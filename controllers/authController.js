@@ -71,6 +71,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(
       new AppError("The user belonging to this token doesn't exists", 401)
     );
+  if(!user.active) {
+    return next(new AppError('Your account is deactivated, Please active you account', 403))
+  }
 
   // 4) check if the user change the password after the toke created
   if (user.passwordChangedAfter(decoded.iat))
