@@ -44,7 +44,7 @@ exports.getOne = (Model) => asyncHandler(async (req, res, next) => {
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    req.body.slug = slugify(req.body.name)
+    req.body.slug = slugify(req.body.name || req.body.title)
     const document = await Model.create(req.body);
 
     res.status(201).json({
@@ -55,8 +55,9 @@ exports.createOne = (Model) =>
 
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    if (req.body && req.body.name) {
-      req.body.slug = slugify(req.body.name);
+    const fieldValue = req.body.name || req.body.title
+    if (req.body && fieldValue) {
+      req.body.slug = slugify(fieldValue);
     }
     const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
