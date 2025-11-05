@@ -9,6 +9,9 @@ exports.getAll = (Model) => asyncHandler(async (req, res) => {
     if (req.params.categoryId) {
         filter = {category: req.params.categoryId}
     }
+    if(req.params.productId) {
+      filter = {product: req.params.productId}
+    }
  const documentCounts = await Model.countDocuments()
   const features = new ApiFeatures(Model.find(filter), req.query)
     .paginate(documentCounts)
@@ -29,9 +32,13 @@ exports.getAll = (Model) => asyncHandler(async (req, res) => {
   });
 });
 
-exports.getOne = (Model) => asyncHandler(async (req, res, next) => {
+exports.getOne = (Model, populateOpt) => asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const document = await Model.findById( id );
+
+  let query = Model.findById( id );
+  if(populateOpt) query = query.populate(populateOpt);
+
+  const document = await query
   if (!document) {
     return next(new AppError(`No document found with this ID: ${id}`, 404));
   }
@@ -44,6 +51,9 @@ exports.getOne = (Model) => asyncHandler(async (req, res, next) => {
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res, next) => {
+    if (!req.body.user && req.user) {
+      req.body.user = req.user._id;
+    }
     req.body.slug = slugify(req.body.name || req.body.title)
     const document = await Model.create(req.body);
 
