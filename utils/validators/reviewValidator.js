@@ -15,7 +15,7 @@ exports.createReviewValidator = [
     .isFloat({ min: 1, max: 5 })
     .withMessage("Ratings value must be between 1 to 5"),
   check("user").isMongoId().withMessage("Invalid user ID format"),
-  check("product")
+  check("product").optional()
     .isMongoId()
     .withMessage("Invalid product ID format")
     .custom(async (val, { req }) => {
@@ -26,7 +26,7 @@ exports.createReviewValidator = [
         product: val,
       });
       if (reviewExists) {
-        throw new Error(`Yor already created a Review Before`);
+        throw new Error(`Yor already created a Review on this product Before`);
       }
     }),
   validatorMiddleware.validator,
@@ -56,7 +56,7 @@ exports.deleteReviewValidator = [
       const review = await Review.findById(val);
       if (!review) throw new Error(`no Review found with this ID: ${val}`);
       if (req.user.role === "user") {
-        if (review.user.toString() !== req.user._id.toString())
+        if (review.user._id.toString() !== req.user._id.toString())
           throw new Error(`You are not allowed to update this review`);
       }
     }),

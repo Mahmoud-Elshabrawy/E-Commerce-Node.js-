@@ -20,6 +20,9 @@ const { protect, restrictTo } = require("../controllers/authController");
 
 const router = express.Router();
 
+const reviewsRoutes = require('../routes/reviewRoutes')
+router.use('/:productId/reviews', reviewsRoutes)
+
 router.route("/").get(getProducts).post(protect,
     restrictTo('admin', 'manager'),uploadProductImages, resizeImg, createProductValidator, createProduct);
 
