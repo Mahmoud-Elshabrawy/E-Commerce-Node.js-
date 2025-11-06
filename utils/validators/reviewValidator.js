@@ -40,7 +40,7 @@ exports.updateReviewValidator = [
       // user updates only his reviews
       const review = await Review.findById(val);
       if (!review) throw new Error(`no Review found with this ID: ${val}`);
-      if (review.user.toString() !== req.user._id.toString())
+      if (review.user._id.toString() !== req.user._id.toString())
         throw new Error(`Yor not allowed to update this review`);
     }),
 
