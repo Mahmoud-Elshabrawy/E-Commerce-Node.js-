@@ -1,29 +1,49 @@
 const express = require("express");
-const subCategoryController = require("../controllers/subCategoryController");
+const {
+  getSubCategories,
+  getSubCategory,
+  createSubCategory,
+  deleteSubCategory,
+  updateSubCategory,
+  setCategoryId,
+  filterObj,
+} = require("../controllers/subCategoryController");
 const {
   getSubCategoryValidator,
   createSubCategoryValidator,
   updateSubCategoryValidator,
   deleteSubCategoryValidator,
 } = require("../utils/validators/subCategoryValidators");
-const {setCategoryIdToBody} = require('../controllers/subCategoryController')
+
 const { protect, restrictTo } = require("../controllers/authController");
 
-const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 
 router
-  .route('/')
-  .get(subCategoryController.getSubCategories)
-  .post(protect,
-    restrictTo('admin', 'manager'),createSubCategoryValidator, subCategoryController.createSubCategory);
-
+  .route("/")
+  .get(filterObj, getSubCategories)
+  .post(
+    protect,
+    restrictTo("admin", "manager"),
+    createSubCategoryValidator,
+    setCategoryId,
+    createSubCategory
+  );
 
 router
-  .route('/:id')
-  .get(getSubCategoryValidator, subCategoryController.getSubCategory)
-  .patch(protect,
-    restrictTo('admin', 'manager'),updateSubCategoryValidator, subCategoryController.updateSubCategory)
-  .delete(protect,
-    restrictTo('admin'),deleteSubCategoryValidator, subCategoryController.deleteSubCategory)
+  .route("/:id")
+  .get(getSubCategoryValidator, getSubCategory)
+  .patch(
+    protect,
+    restrictTo("admin", "manager"),
+    updateSubCategoryValidator,
+    updateSubCategory
+  )
+  .delete(
+    protect,
+    restrictTo("admin"),
+    deleteSubCategoryValidator,
+    deleteSubCategory
+  );
 
 module.exports = router;

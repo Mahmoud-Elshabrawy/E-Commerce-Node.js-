@@ -15,8 +15,8 @@ exports.createSubCategoryValidator = [
     .isLength({ max: 20 })
     .withMessage("Too long SubCategory name"),
   check("category")
-    .notEmpty()
-    .withMessage("SubCategory must belong to Category"),
+    .optional()
+    ,
   validatorMiddleware.validator,
 ];
 
