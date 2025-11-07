@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    wishList: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -59,9 +65,9 @@ userSchema.methods.passwordChangedAfter = function (JWTTimeStamp) {
       this.passwordChangedAt.getTime() / 1000,
       10
     );
-    return JWTTimeStamp < changedTimestamp
+    return JWTTimeStamp < changedTimestamp;
   }
-  return false
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);
