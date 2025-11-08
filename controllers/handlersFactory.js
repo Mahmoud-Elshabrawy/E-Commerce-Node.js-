@@ -10,6 +10,9 @@ exports.getAll = (Model) =>
       filter = req.filter;
     }
     const documentCounts = await Model.countDocuments();
+    if (typeof filter === "function") {
+      filter = {};
+    }
     const features = new ApiFeatures(Model.find(filter), req.query)
       .paginate(documentCounts)
       .filter()

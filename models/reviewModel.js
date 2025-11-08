@@ -51,7 +51,7 @@ reviewSchema.statics.calculateRatingsAvg = async function (productId) {
       ratingsQuantity: result[0].ratingsQuantity,
     });
   } else {
-    await Tour.findByIdAndUpdate(tourId, {
+    await Product.findByIdAndUpdate(productId, {
       ratingsAverage: 0,
       ratingsQuantity: 0,
     });
