@@ -6,15 +6,8 @@ dotenv.config({path: 'config.env'})
 const dbConnection = require('./config/database')
 const GlobalError = require('./middlewares/globalError')
 const AppError = require('./utils/appError')
-const categoryRoutes = require('./routes/categoryRoutes')
-const subCategoryRoutes = require('./routes/subCategoryRoutes')
-const brandRoutes = require('./routes/brandRoutes')
-const productRoutes = require('./routes/productRoutes')
-const userRoutes = require('./routes/userRoutes')
-const authRoutes = require('./routes/authRoutes')
-const reviewRoutes = require('./routes/reviewRoutes')
-const wishListRoutes = require('./routes/wishListRoutes')
-const addressRoutes = require('./routes/addressRoutes')
+
+const mountRoutes = require('./routes/index')
 
 // DB Connection
 dbConnection()
@@ -36,15 +29,7 @@ if(process.env.NODE_ENV === 'development') {
 
 
 // Routes
-app.use('/api/v1/categories', categoryRoutes)
-app.use('/api/v1/subcategories', subCategoryRoutes)
-app.use('/api/v1/brands', brandRoutes)
-app.use('/api/v1/products', productRoutes)
-app.use('/api/v1/users', userRoutes)
-app.use('/api/v1/auth', authRoutes)
-app.use('/api/v1/reviews', reviewRoutes)
-app.use('/api/v1/wishlist', wishListRoutes)
-app.use('/api/v1/addresses', addressRoutes)
+mountRoutes(app)
 
 app.use((req, res, next) => {
     next(new AppError(`Can\'t find this route: ${req.originalUrl}`, 400))

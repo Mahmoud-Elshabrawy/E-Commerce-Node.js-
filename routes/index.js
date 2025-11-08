@@ -1,0 +1,25 @@
+const categoryRoutes = require("./categoryRoutes");
+const subCategoryRoutes = require("./subCategoryRoutes");
+const brandRoutes = require("./brandRoutes");
+const productRoutes = require("./productRoutes");
+const userRoutes = require("./userRoutes");
+const authRoutes = require("./authRoutes");
+const reviewRoutes = require("./reviewRoutes");
+const wishListRoutes = require("./wishListRoutes");
+const addressRoutes = require("./addressRoutes");
+const couponRoutes = require("./couponRoutes");
+
+const mountRoutes = (app) => {
+  app.use("/api/v1/categories", categoryRoutes);
+  app.use("/api/v1/subcategories", subCategoryRoutes);
+  app.use("/api/v1/brands", brandRoutes);
+  app.use("/api/v1/products", productRoutes);
+  app.use("/api/v1/users", userRoutes);
+  app.use("/api/v1/auth", authRoutes);
+  app.use("/api/v1/reviews", reviewRoutes);
+  app.use("/api/v1/wishlist", wishListRoutes);
+  app.use("/api/v1/addresses", addressRoutes);
+  app.use("/api/v1/coupons", couponRoutes);
+};
+
+module.exports = mountRoutes;
