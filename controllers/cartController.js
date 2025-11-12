@@ -3,6 +3,9 @@ const AppError = require("../utils/appError");
 
 const Cart = require("../models/cartModel");
 const Product = require("../models/productModel");
+const Coupon = require('../models/couponModel')
+
+
 
 const calcTotalCartPrice = (cart) => {
   let totalPrice = cart.cartItems.reduce((acc, cur) => {
@@ -29,6 +32,10 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         item.product.toString() === req.body.product &&
         item.color === req.body.color
     );
+
+    if (itemIdx === -1) {
+      return next(new AppError(`No item found with id: ${req.params.id}`, 404));
+    }
 
     if (productExists > -1) {
       cart.cartItems[productExists].quantity++;
@@ -67,8 +74,8 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
 exports.removeCartItem = asyncHandler(async (req, res, next) => {
   // get user cart items and remove specific item
   let cart = await Cart.findOneAndUpdate(
-    {user: req.user._id,},
-    { $pull: { cartItems: { _id: req.params.id } }},
+    { user: req.user._id },
+    { $pull: { cartItems: { _id: req.params.id } } },
     { new: true }
   );
   calcTotalCartPrice(cart);
@@ -79,3 +86,60 @@ exports.removeCartItem = asyncHandler(async (req, res, next) => {
     cart,
   });
 });
+
+exports.removeAllCartItems = asyncHandler(async (req, res, next) => {
+  let cart = await Cart.findOneAndDelete({ user: req.user._id });
+  res.status(204).json({});
+});
+
+exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
+  const { quantity } = req.body;
+  let cart = await Cart.findOne({ user: req.user._id });
+  if (!cart)
+    return next(
+      new AppError(`No cart found for this user: ${req.user._id}`, 404)
+    );
+  const itemIdx = cart.cartItems.findIndex(
+    (item) => item._id.toString() === req.params.id
+  );
+
+
+  if (itemIdx > -1) {
+    cart.cartItems[itemIdx].quantity = quantity;
+  } else {
+    return next(new AppError(`No item found with id: ${req.params.id}`, 404));
+  }
+
+  calcTotalCartPrice(cart);
+
+  await cart.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Cart item updated successfully",
+    cart,
+  });
+});
+
+
+exports.applyCoupon = asyncHandler(async (req, res, next) => {
+  // get logged user cart
+  let cart = await Cart.findOne({user: req.user._id})
+
+  // get coupon and check validation
+  let coupon = await Coupon.findOne({name: req.body.coupon, expire: {$gt: Date.now()}})
+
+  if(!coupon) {
+    return next(new AppError(`Coupon is invalid or expired`, 404))
+  }
+
+  // apply discount on totalCartPriceAfterDiscount
+  cart.totalCartPriceAfterDiscount = (cart.totalCartPrice - ((coupon.discount / 100) * cart.totalCartPrice)).toFixed(2)
+  await cart.save()
+
+  res.status(200).json({
+    status: 'success',
+    cart
+  })
+
+})
