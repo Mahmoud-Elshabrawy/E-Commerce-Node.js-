@@ -16,39 +16,43 @@ const calcTotalCartPrice = (cart) => {
 
 // Add Product to Cart
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  // get logged user cart
+  const productId = req.body.product;
+  const color = req.body.color;
+
+  const product = await Product.findById(productId);
+  if (!product) return next(new AppError("Product not found", 404));
+
   let cart = await Cart.findOne({ user: req.user._id });
-  const product = await Product.findById(req.body.product);
+
   if (!cart) {
-    // create cart for logged user with product
     cart = await Cart.create({
       user: req.user._id,
-      cartItems: { product, color: req.body.color, price: product.price },
+      cartItems: [
+        {
+          product: product._id,
+          color,
+          price: product.price,
+          quantity: 1,
+        },
+      ],
     });
   } else {
-    // if product already exists, update product quantity
-    let productExists = await cart.cartItems.findIndex(
-      (item) =>
-        item.product.toString() === req.body.product &&
-        item.color === req.body.color
+    const itemIdx = cart.cartItems.findIndex(
+      (item) => item.product.toString() === productId && item.color === color
     );
 
-    if (itemIdx === -1) {
-      return next(new AppError(`No item found with id: ${req.params.id}`, 404));
-    }
-
-    if (productExists > -1) {
-      cart.cartItems[productExists].quantity++;
+    if (itemIdx > -1) {
+      cart.cartItems[itemIdx].quantity += 1;
     } else {
-      // else push new product to cartItems
       cart.cartItems.push({
-        product,
-        color: req.body.color,
+        product: product._id,
+        color,
         price: product.price,
+        quantity: 1,
       });
     }
   }
-  //   Calculate total cart price
+
   calcTotalCartPrice(cart);
   await cart.save();
 
@@ -58,6 +62,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
     cart,
   });
 });
+
 
 exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
   const userCart = await Cart.findOne({ user: req.user._id });
