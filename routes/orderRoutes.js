@@ -6,7 +6,8 @@ const {
   getOrder,
   getAllOrdersForLoggedUser,
   updateOrderToPaid,
-  updateOrderToDelivered
+  updateOrderToDelivered,
+  checkOutSession
 } = require("../controllers/orderController");
 
 const { protect, restrictTo } = require("../controllers/authController");
@@ -14,6 +15,8 @@ const { protect, restrictTo } = require("../controllers/authController");
 const router = express.Router();
 
 router.use(protect);
+
+router.get('/checkout-session/:id', restrictTo('user'), checkOutSession)
 
 router
   .route("/")
