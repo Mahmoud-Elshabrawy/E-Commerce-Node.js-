@@ -142,6 +142,7 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   const signature = req.headers['stripe-signature']
   let event
+  console.log(process.env.STRIPE_WEBHOOK_SECRET);
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
