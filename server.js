@@ -7,6 +7,9 @@ const dbConnection = require('./config/database')
 const GlobalError = require('./middlewares/globalError')
 const AppError = require('./utils/appError')
 
+const cors = require('cors')
+const compression = require('compression')
+
 const mountRoutes = require('./routes/index')
 
 // DB Connection
@@ -17,6 +20,13 @@ dbConnection()
 // express App
 const app = express()
 
+
+// enable other domains to access api's
+app.use(cors())
+
+
+// compress all responses
+app.use(compression())
 
 
 // Middlewares
