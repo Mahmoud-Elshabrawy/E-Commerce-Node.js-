@@ -11,7 +11,7 @@ const cors = require('cors')
 const compression = require('compression')
 
 const mountRoutes = require('./routes/index')
-
+const {webhookCheckout} = require('./controllers/orderController')
 // DB Connection
 dbConnection()
 
@@ -28,6 +28,9 @@ app.use(cors())
 // compress all responses
 app.use(compression())
 
+
+// Checkout Webhook
+app.post('/webhook-checkout', express.raw({type: 'application/json'}), webhookCheckout)
 
 // Middlewares
 app.use(express.json())
