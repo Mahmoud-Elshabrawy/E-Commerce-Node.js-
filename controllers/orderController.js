@@ -9,8 +9,6 @@ const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const factory = require("../controllers/handlersFactory");
 
-
-
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const shippingPrice = 0;
   // get user cart
@@ -55,16 +53,15 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   });
 });
 
-
 exports.updateOrderToPaid = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order)
     return next(
       new AppError(`no order found with this ID: ${req.params.id}`, 404)
     );
-    
+
   if (order.isPaid) return next(new AppError("Order is already paid", 400));
-  
+
   order.isPaid = true;
   order.paidAt = Date.now();
   await order.save();
@@ -78,31 +75,31 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order)
     return next(
-  new AppError(`no order found with this ID: ${req.params.id}`, 404)
-);
+      new AppError(`no order found with this ID: ${req.params.id}`, 404)
+    );
 
-if (order.isDelivered)
-  return next(new AppError("Order is already delivered", 400));
+  if (order.isDelivered)
+    return next(new AppError("Order is already delivered", 400));
 
-order.isDelivered = true;
-order.deliveredAt = Date.now();
-await order.save();
-res.status(200).json({
-  status: "success",
-  data: order,
-});
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+  await order.save();
+  res.status(200).json({
+    status: "success",
+    data: order,
+  });
 });
 
 exports.checkOutSession = asyncHandler(async (req, res, next) => {
   // get current order
   const cart = await Cart.findById(req.params.id);
   if (!cart) return next(new AppError("Cart not found", 404));
-  
+
   // get cart price
   const totalPrice = cart.totalCartPriceAfterDiscount
-  ? cart.totalCartPriceAfterDiscount
-  : cart.totalCartPrice;
-  
+    ? cart.totalCartPriceAfterDiscount
+    : cart.totalCartPrice;
+
   const metadata = {
     cartId: cart._id.toString(),
     userId: req.user._id.toString(),
@@ -130,7 +127,7 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
         quantity: 1,
       },
     ],
-    
+
     // send session
   });
   res.status(200).json({
@@ -145,7 +142,7 @@ const createCardOrder = async (session) => {
   const orderPrice = session.amount_total / 100;
   const cart = await Cart.findById(cartId);
   const user = await User.findOne({ email: session.customer_email });
-  
+
   // create order with Card Payment
   const order = await Order.create({
     user: user._id,
@@ -169,10 +166,6 @@ const createCardOrder = async (session) => {
     // clear cart
     await Cart.findByIdAndDelete(cartId);
   }
-  
-  res.status(200).json({
-    received: true,
-  });
 };
 
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
@@ -193,6 +186,7 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     // console.log('create Order Here....');
     createCardOrder(event.data.object);
   }
+  res.status(200).json({ received: true });
 });
 
 exports.getAllOrdersForLoggedUser = asyncHandler(async (req, res, next) => {
