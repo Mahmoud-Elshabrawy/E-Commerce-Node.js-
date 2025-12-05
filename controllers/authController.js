@@ -9,7 +9,7 @@ const User = require("../models/userModel");
 const { default: slugify } = require("slugify");
 const sendEmail = require("../utils/email");
 const generateToken = require('../utils/generateToken')
-
+const {sanitizeData} = require('../utils/sanitizeData')
 
 exports.signUp = asyncHandler(async (req, res) => {
   // create user
@@ -20,9 +20,8 @@ exports.signUp = asyncHandler(async (req, res) => {
   res.status(201).json({
     status: "success",
     token,
-    data: {
-      user,
-    },
+    data: sanitizeData(user)
+    ,
   });
 });
 
