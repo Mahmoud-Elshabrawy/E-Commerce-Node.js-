@@ -22,8 +22,13 @@ class ApiFeatures {
   // 3) Sorting
   sort() {
     if (this.queryStr.sort) {
-      let sortBy = this.queryStr.sort.split(",").join(" ");
-      this.query = this.query.sort(sortBy);
+      let sortBy = this.queryStr.sort;
+
+      if(Array.isArray(sortBy)) {
+        sortBy = sortBy.pop()
+      }
+      let finalSortBy = sortBy.split(",").join(" ");
+      this.query = this.query.sort(finalSortBy);      
     } else {
       this.query = this.query.sort("-createdAt");
     }
