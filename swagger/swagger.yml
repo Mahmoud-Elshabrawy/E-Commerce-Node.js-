@@ -1,0 +1,948 @@
+openapi: 3.0.1
+info:
+  title: E-Shop API
+  version: "1.0.0"
+  description: E-Shop REST API documentation (matched to routes)
+
+servers:
+  - url: https://e-shop-0c.up.railway.app
+    description: Production
+  - url: http://localhost:8000
+    description: Local
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: test@example.com
+        password:
+          type: string
+          example: 123456
+
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+
+    UserPartial:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        image:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        image:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+
+    ProductList:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        page:
+          type: integer
+        pages:
+          type: integer
+        total:
+          type: integer
+
+    CategoryList:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        page:
+          type: integer
+        pages:
+          type: integer
+        total:
+          type: integer
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        rating:
+          type: number
+        comment:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserPartial'
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
+
+    CartItem:
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: integer
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        total:
+          type: number
+
+    Coupon:
+      type: object
+      properties:
+        code:
+          type: string
+        discount:
+          type: number
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserPartial'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        total:
+          type: number
+        status:
+          type: string
+
+paths:
+
+  # Auth
+  /api/v1/auth/signup:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPartial'
+        "400":
+          description: bad request
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        "401":
+          description: invalid credentials
+
+  /api/v1/auth/forgotPassword:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+      responses:
+        "200": { description: ok }
+
+  /api/v1/auth/verifyResetPassword:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+                email: { type: string }
+      responses:
+        "200": { description: ok }
+
+  /api/v1/auth/resetPassword:
+    patch:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                code: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: password updated }
+
+  # Users
+  /api/v1/users:
+    get:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserPartial'
+    post:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "201": { description: created }
+
+  /api/v1/users/getMe:
+    get:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPartial'
+
+  /api/v1/users/updateMyData:
+    patch:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "200": { description: updated }
+
+  /api/v1/users/updateMyPassword:
+    patch:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string }
+      responses:
+        "200": { description: password updated }
+
+  /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  /api/v1/users/updatePassword/{id}:
+    patch:
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password: { type: string }
+      responses:
+        "200": { description: updated }
+
+  # Categories
+  /api/v1/categories:
+    get:
+      tags: [Categories]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryList'
+
+    post:
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                image: { type: string, format: binary }
+      responses:
+        "201": { description: created }
+
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Subcategories
+  /api/v1/categories/{categoryId}/subcategories:
+    get:
+      tags: [SubCategories]
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [SubCategories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+      responses:
+        "201": { description: created }
+
+  /api/v1/subcategories/{id}:
+    get:
+      tags: [SubCategories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [SubCategories]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [SubCategories]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Brands
+  /api/v1/brands:
+    get:
+      tags: [Brands]
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Brands]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "201": { description: created }
+
+  /api/v1/brands/{id}:
+    get:
+      tags: [Brands]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Brands]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Brands]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Products
+  /api/v1/products:
+    get:
+      tags: [Products]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+
+    post:
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                price: { type: number }
+                images: { type: string, format: binary }
+      responses:
+        "201": { description: created }
+
+  /api/v1/products/{id}:
+    get:
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Product Reviews
+  /api/v1/products/{productId}/reviews:
+    get:
+      tags: [Reviews]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Reviews]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: { type: number }
+                comment: { type: string }
+      responses:
+        "201": { description: created }
+
+  /api/v1/reviews/{id}:
+    get:
+      tags: [Reviews]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Reviews]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Reviews]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Wishlist
+  /api/v1/wishlist:
+    get:
+      tags: [Wishlist]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Wishlist]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId: { type: string }
+      responses:
+        "201": { description: added }
+
+  /api/v1/wishlist/{id}:
+    delete:
+      tags: [Wishlist]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: removed }
+
+  # Addresses
+  /api/v1/addresses:
+    get:
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+      responses:
+        "201": { description: created }
+
+  /api/v1/addresses/{id}:
+    delete:
+      tags: [Addresses]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: removed }
+
+  # Coupons
+  /api/v1/coupons:
+    get:
+      tags: [Coupons]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Coupons]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coupon'
+      responses:
+        "201": { description: created }
+
+  /api/v1/coupons/{id}:
+    get:
+      tags: [Coupons]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Coupons]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: updated }
+
+    delete:
+      tags: [Coupons]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: deleted }
+
+  # Cart
+  /api/v1/cart:
+    get:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+
+    post:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+      responses:
+        "201": { description: added }
+
+    delete:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: cleared }
+
+  /api/v1/cart/applyCoupon:
+    patch:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+      responses:
+        "200": { description: applied }
+
+  /api/v1/cart/{id}:
+    delete:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: removed }
+
+    patch:
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+      responses:
+        "200": { description: updated }
+
+  # Orders
+  /api/v1/orders/checkout-session/{id}:
+    get:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: session created }
+
+  /api/v1/orders:
+    get:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: ok }
+
+    post:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201": { description: created }
+
+  /api/v1/orders/{id}:
+    get:
+      tags: [Orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: ok }
+
+    patch:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { description: updated }
+
+  /api/v1/orders/{id}/deliver:
+    patch:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: updated }
+
+  # Product image upload
+  /api/v1/products/upload-image/{id}:
+    put:
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200": { description: uploaded }
+
+  # Webhook
+  /webhook-checkout:
+    post:
+      tags: [Webhook]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200": { description: received }

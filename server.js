@@ -26,6 +26,11 @@ dbConnection()
 const app = express()
 
 
+
+const swaggerDocs = require('./swagger/swaggerDoc') 
+swaggerDocs(app)
+
+
 // enable other domains to access api's
 app.use(cors())
 
