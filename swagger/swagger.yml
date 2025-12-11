@@ -5,7 +5,7 @@ info:
   description: E-Shop REST API documentation (matched to routes)
 
 servers:
-  - url: https://e-shop-0c.up.railway.app
+  - url: https://eshop-dev.up.railway.app
     description: Production
   - url: http://localhost:8000
     description: Local
